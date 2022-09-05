@@ -1,8 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.conf import settings
+from sendgrid import SendGridAPIClient
+
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
@@ -11,6 +14,7 @@ class Subscriber(models.Model):
 
     def __str__(self):
         return self.email + " (" + str(self.confirmed) + ")"
+
 
 class PublishedManager(models.Manager):
     def get_queryset(self):
@@ -49,3 +53,18 @@ class Article(models.Model):
                        args=[self.publish.year,
                              self.publish.month,
                              self.publish.day, self.slug])
+
+
+class Email(models.Model):
+    to = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    subject = models.CharField(max_length=150)
+    date = models.DateTimeField(auto_now_add=True, null=True)
+    contents = models.FileField(upload_to='uploaded_newsletters/', default=None)
+    content = models.CharField(max_length=500, default='')
+
+    def __str__(self):
+        return f"{self.subject}{self.created_at.strftime('%m/%d/%Y, %H:%M:%S')}"
+
+

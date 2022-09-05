@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from mailing import views
+from mailing.views import EmailAttachementView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,8 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'),
     name='home'),
     path('mailing/', views.ListView.as_view(), name='mailing'),
-    path('article_new/', views.EmailCreateView.as_view(), name='article_new'),
+    path('article_new/', views.PostCreateView.as_view(), name='article_new'),
+    #path('sendmail/', views.newmail, name='sendmail'),
+    path('sendmail/', EmailAttachementView.as_view(), name='sendmail'),
 
 ]

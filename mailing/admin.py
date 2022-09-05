@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Article,Subscriber
+from .models import Article,Subscriber, Email
 
 
 @admin.register(Article)
@@ -13,5 +13,10 @@ class PostAdmin(admin.ModelAdmin):
     date_hierarchy = 'publish'
     ordering = ('status', 'publish')
 
+@admin.register(Email)
+class EmailAdmin(admin.ModelAdmin):
+    list_display = ('subject','date','content','to')
+
 
 admin.site.register(Subscriber)
+#admin.site.register(Email)

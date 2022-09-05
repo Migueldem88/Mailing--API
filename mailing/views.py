@@ -1,17 +1,24 @@
 import random
+from django.conf import settings
 
+
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.db import models
-from .forms import EmailPostForm, SubscriberForm
-from .models import Article, Subscriber
-from django.conf import settings
+from .forms import EmailPostForm, SubscriberForm, EmailSendForm
+from .models import Article, Subscriber, Email
+
 from django.core.paginator import Paginator, EmptyPage,\
 PageNotAnInteger
 from django.views.generic import ListView, CreateView
-from django.shortcuts import redirect
+from django.shortcuts import redirect,render
 from django.views.decorators.csrf import csrf_exempt
+from django.views import View
+from django.core.mail import EmailMessage
+
+
 
 User = settings.AUTH_USER_MODEL
 
@@ -21,10 +28,11 @@ class ArticleListView(ListView):
     paginate_by = 4
     template_name = 'list.html'
 
-class EmailCreateView(CreateView):
+class PostCreateView(CreateView):
     model = Article
     template_name = 'article_new.html'
     fields = ('title', 'slug', 'author', 'body','status')
+
 
 
 def article_detail(request, year, month, day, post):
@@ -90,3 +98,42 @@ def new(request):
         return render(request, 'index.html', {'email': sub.email, 'action': 'added', 'form': SubscriberForm()})
     else:
         return render(request, 'index.html', {'form': SubscriberForm()})
+
+# class EmailCreateView(CreateView):
+#     model = Email
+#     template_name = 'sendmail.html'
+#     fields = ('to','subject', 'content',)
+
+class EmailAttachementView(View):
+    form_class = EmailSendForm
+    template_name = 'sendmail.html'
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'email_form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
+
+        if form.is_valid():
+
+            subject = form.cleaned_data['subject']
+            body = form.cleaned_data['content']
+
+            email = form.cleaned_data['to']
+            attach = request.FILES['attach']
+            mail = EmailMessage(subject, body, settings.DEFAULT_FROM_EMAIL, email,)
+            mail.send()
+
+            try:
+                mail = EmailMessage(subject, body, [email])
+                mail.attach(attach.name, attach.read(), attach.content_type)
+                mail.send()
+                return render(request, self.template_name,
+                              {'email_form': form, 'error_message': 'Sent email to %s' % email})
+            except:
+                return render(request, self.template_name,
+                              {'email_form': form, 'error_message': 'Either the attachment is too big or corrupt'})
+
+        return render(request, self.template_name,
+                      {'email_form': form, 'error_message': 'Unable to send email. Please try again later'})
