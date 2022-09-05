@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    </head>
+{% if user.is_authenticated %}
+    Hi {{ user.username }}!
+
+    <body>
+        <p><a href="{% url 'mailing' %}">Post_List</a></p>
+        <p><a href="{% url 'new' %}">Add Subscriber email address</a></p>
+        <p><a href="{% url 'logout' %}">Log Out</a></p>
+
+    </body>
+{% else %}
+    <p>You are not logged in</p>
+    <a href="{% url 'login' %}">Log In</a> |
+    <a href="{% url 'signup' %}">Sign Up</a>
+
+{% endif %}
+{% endblock content %}
