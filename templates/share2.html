@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Send an email{% endblock %}
+{% block content %}
+    {% if sent %}
+        <h1>E-mail successfully sent</h1>
+        <p>
+            "Email was successfully sent"
+        </p>
+    {% else %}
+        <h1>Send e-mail</h1>
+        <form method="post">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" value="Send e-mail">
+        </form>
+    {% endif %}
+{% endblock %}
