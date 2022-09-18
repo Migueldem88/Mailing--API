@@ -1,24 +1,21 @@
 import random
 from django.conf import settings
 
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
-from django.core.mail import send_mail
-from django.db import models
+from django.urls import reverse, reverse_lazy
+from django.core.mail import send_mail, EmailMessage
 from .forms import EmailPostForm, SubscriberForm, EmailSendForm
 from .models import Article, Subscriber, Email
 
 from django.core.paginator import Paginator, EmptyPage,\
 PageNotAnInteger
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, DetailView, CreateView
 from django.shortcuts import redirect,render
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View
-from django.core.mail import EmailMessage
 
-
+from django.views.generic.edit import UpdateView, DeleteView
 
 User = settings.AUTH_USER_MODEL
 
@@ -28,9 +25,10 @@ class ArticleListView(ListView):
     paginate_by = 4
     template_name = 'list.html'
 
+
 class PostCreateView(CreateView):
     model = Article
-    template_name = 'article_new.html'
+    template_name = 'article/article_new.html'
     fields = ('title', 'slug', 'author', 'body','status')
 
 
@@ -42,7 +40,16 @@ def article_detail(request, year, month, day, post):
     publish__month=month,
     publish__day=day)
 
-    return render(request,'detail.html', {'post': post})
+    return render(request,'article/detail.html', {'post': post})
+
+class ArticleUpdateView(UpdateView):
+    model = Article
+    fields = ('title', 'body',)
+    template_name = 'article/article_edit.html'
+class ArticleDeleteView(DeleteView):
+    model = Article
+    template_name = 'article/article_delete.html'
+    success_url = reverse_lazy('mailing')
 
 def post_list(request):
     object_list = Article.published.all()
@@ -137,3 +144,4 @@ class EmailAttachementView(View):
 
         return render(request, self.template_name,
                       {'email_form': form, 'error_message': 'Unable to send email. Please try again later'})
+

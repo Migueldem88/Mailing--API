@@ -17,10 +17,13 @@
                 {{ post.title }}
             </a>
             </h2>
-        <p class="date">
-            Published {{ post.publish }} by {{ post.author }}
-        </p>
-            {{ post.body|truncatewords:30|linebreaks }}
+            <div class="date">
+                Published {{ post.publish }} by {{ post.author }}
+            </div>
+                {{ post.body|truncatewords:30|linebreaks }}
+            <div class="card-footer text-center text-muted">
+                <a href={{post.id}}/edit>Edit</a> | <a href={{post.id}}/delete>Delete</a>
+            </div>
         {% endfor %}
     {% include "pagination.html" with page=page_obj %}
 {% endblock %}
